@@ -1,2 +1,8 @@
 *.vo
 *.glob
+.*.aux
+*.dpd
+test.v
+temp.v
+*.txt
+coqine/

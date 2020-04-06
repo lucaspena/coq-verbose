@@ -16,6 +16,7 @@ Print IF_then_else.
 
 Inductive and' (A B:Prop) : Prop :=
   conj' : forall (x : A), forall (y : B), and' A B.
+
 Print and'_ind.
 Inductive ex1 (A : Type) (P : forall (x : A), Prop) : Prop :=
   ex_intro1 : forall x : A, forall (y : (P x)), ex1 A P.

@@ -114,16 +114,20 @@ def removeType(defn, typ):
                 j += 1
 
 # create map from name to typed Coq definition. Combine definition map and type map
-def createDefMapWithType(defMap, typeMap, module):
+def createDefMapWithType(defMap, typeMap, modules):
     for key in defMap:
         new_def = defMap[key]
         if new_def.split(' ')[0] != 'Inductive':
             curr_type = typeMap[key]
             new_def = removeType(new_def, curr_type)
             new_def = new_def.replace('TYPE', curr_type)[:-4]
-        # TODO: remove qualified names in definitions without having to input module
-        defMap[key] = new_def[:-2].replace(module + '.', '') + ' .\n'
+        # TODO: remove qualified names in definitions without having to input modules
+        for module in modules:
+            defMap[key] = new_def[:-2].replace(module + '.', '') + ' .\n'
     return defMap
+
+def verboseName(orig_def, def_name):
+    return orig_def.replace(def_name, def_name + '_verbose', 1)
 
 # generate verbose Coq file from original file. All definitions use completely desugared
 # notations, etc. Proofs/lemmas are replaced with the generated definition. The generated
@@ -140,8 +144,9 @@ def generateVerboseCoqFile(orig_file):
     generateModuleGraph(orig_file, dpd_file, temp_file)
     def_map = createDefinitionMap(dpd_file, orig_file)
     type_map = createTypeMap(dpd_file, orig_file, def_map.keys())
-    full_defs = createDefMapWithType(def_map, type_map, 'MLCoq')
-    with open(orig_prefix + '_verbose.v', 'w') as result, open(orig_file, 'r') as in_file:
+    full_defs = createDefMapWithType(def_map, type_map, ['MLCoq'])
+    verbose_file = orig_prefix + '_verbose.v'
+    with open(verbose_file, 'w') as result, open(orig_file, 'r') as in_file:
         def_keywords = ['Inductive', 'Definition']
         proof_keywords = ['Lemma', 'Theorem', 'Corollary']
         def_print = True
@@ -156,11 +161,14 @@ def generateVerboseCoqFile(orig_file):
                 def_print = False
                 ind_name = split_line[1]
                 result.write(def_map[ind_name])
-                # result.write(def_map[ind_name + '_ind'])
-                # if ind_name + '_rec' in def_map.keys():
-                #     result.write(def_map[ind_name + '_rec'])
-                # if ind_name + '_rect' in def_map.keys():
-                #     result.write(def_map[ind_name + '_rect'])
+                ind_name_ind = ind_name + '_ind'
+                ind_name_rec = ind_name + '_rec'
+                ind_name_rect = ind_name + '_rect'
+                result.write(verboseName(def_map[ind_name_ind], ind_name_ind))
+                if ind_name_rec in def_map.keys():
+                    result.write(verboseName(def_map[ind_name_rec], ind_name_rec))
+                if ind_name_rect in def_map.keys():
+                    result.write(verboseName(def_map[ind_name_rect], ind_name_rect))
             if split_line[0] in proof_keywords:
                 proof_print = False
                 def_name = split_line[1]
@@ -175,5 +183,6 @@ def generateVerboseCoqFile(orig_file):
                     proof_print = True
             else:
                 print('ERROR')
+    subprocess.run(['coqc', verbose_file])
 
 generateVerboseCoqFile('ml_coq.v')

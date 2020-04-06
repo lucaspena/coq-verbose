@@ -16,20 +16,58 @@ Print IF_then_else.
 
 Inductive and' (A B : Prop) : Prop :=
     conj' : forall (_ : A) (_ : B), and' A B .
+Definition and'_ind_verbose : forall (A B P : Prop) (_ : forall (_ : A) (_ : B), P)(_ : and' A B), P := 
+fun (A B P : Prop) (f : forall (_ : A) (_ : B), P) (a : and' A B) =>
+match a return P with
+| conj' _ _ x x0 => f x x0
+end .
+Definition and'_rec_verbose : forall (A B : Prop) (P : Set) (_ : forall (_ : A) (_ : B), P)(_ : and' A B), P := 
+fun (A B : Prop) (P : Set) => and'_rect A B P .
+Definition and'_rect_verbose : forall (A B : Prop) (P : Type) (_ : forall (_ : A) (_ : B), P)(_ : and' A B), P := 
+fun (A B : Prop) (P : Type) (f : forall (_ : A) (_ : B), P)
+  (a : and' A B) =>
+match a return P with
+| conj' _ _ x x0 => f x x0
+end .
+
 Print and'_ind.
 Inductive ex1 (A : Type) (P : forall _ : A, Prop) : Prop :=
     ex_intro1 : forall (x : A) (_ : P x), ex1 A P .
+Definition ex1_ind_verbose : forall (A : Type) (P : forall _ : A, Prop)(P0 : Prop) (_ : forall (x : A) (_ : P x), P0)(_ : ex1 A P), P0 := 
+fun (A : Type) (P : forall _ : A, Prop) (P0 : Prop)
+  (f : forall (x : A) (_ : P x), P0) (e : ex1 A P) =>
+match e return P0 with
+| ex_intro1 _ _ x x0 => f x x0
+end .
 
 Set Implicit Arguments.
 
 Inductive ex2 (A : Type) (P : forall _ : A, Prop) : Prop :=
     ex_intro2 : forall (x : A) (_ : P x), @ex2 A P .
+Definition ex2_ind_verbose : forall (A : Type) (P : forall _ : A, Prop)(P0 : Prop) (_ : forall (x : A) (_ : P x), P0)(_ : @ex2 A P), P0 := 
+fun (A : Type) (P : forall _ : A, Prop) (P0 : Prop)
+  (f : forall (x : A) (_ : P x), P0) (e : @ex2 A P) =>
+match e return P0 with
+| ex_intro2 _ x x0 => f x x0
+end .
 
 Inductive ex3 (A : Type) (P : forall _ : A, Prop) : Prop :=
     ex_intro3 : forall (x : A) (_ : P x), @ex3 A P .
+Definition ex3_ind_verbose : forall (A : Type) (P : forall _ : A, Prop)(P0 : Prop) (_ : forall (x : A) (_ : P x), P0)(_ : @ex3 A P), P0 := 
+fun (A : Type) (P : forall _ : A, Prop) (P0 : Prop)
+  (f : forall (x : A) (_ : P x), P0) (e : @ex3 A P) =>
+match e return P0 with
+| ex_intro3 _ x x0 => f x x0
+end .
 
 Inductive ex4 (A : Type) (P : forall _ : A, Prop) : Prop :=
     ex_intro4 : forall (x : A) (_ : P x), @ex4 A P .
+Definition ex4_ind_verbose : forall (A : Type) (P : forall _ : A, Prop)(P0 : Prop) (_ : forall (x : A) (_ : P x), P0)(_ : @ex4 A P), P0 := 
+fun (A : Type) (P : forall _ : A, Prop) (P0 : Prop)
+  (f : forall (x : A) (_ : P x), P0) (e : @ex4 A P) =>
+match e return P0 with
+| ex_intro4 _ x x0 => f x x0
+end .
 
 Check conj.
 Check conj'.
